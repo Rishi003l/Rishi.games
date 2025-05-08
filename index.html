@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FreeGameHub - Play Free Online Games</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* Basic Reset */
         * {
@@ -27,6 +28,9 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
         .logo {
@@ -51,6 +55,11 @@
             color: white;
             text-decoration: none;
             font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        
+        nav ul li a:hover {
+            opacity: 0.8;
         }
         
         /* Main Content */
@@ -73,18 +82,32 @@
             color: #4285f4;
         }
         
-        .search-bar {
+        .search-container {
             margin: 1rem auto;
             max-width: 600px;
+            position: relative;
         }
         
-        .search-bar input {
+        .search-container input {
             width: 100%;
-            padding: 0.8rem;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
             border: 2px solid #ddd;
             border-radius: 30px;
             font-size: 1rem;
             outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .search-container input:focus {
+            border-color: #4285f4;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
         }
         
         /* Categories */
@@ -110,12 +133,16 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             cursor: pointer;
             transition: all 0.3s ease;
+            user-select: none;
         }
         
         .category-item:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .category-item.active {
             background-color: #4285f4;
             color: white;
-            transform: translateY(-3px);
         }
         
         /* Games Grid */
@@ -132,6 +159,7 @@
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0,0,0,0.1);
             transition: all 0.3s ease;
+            position: relative;
         }
         
         .game-card:hover {
@@ -144,6 +172,17 @@
             background-color: #ddd;
             background-size: cover;
             background-position: center;
+            position: relative;
+        }
+        
+        .game-thumbnail::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
         }
         
         .game-info {
@@ -160,6 +199,18 @@
             margin-bottom: 1rem;
         }
         
+        .game-category {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: rgba(66, 133, 244, 0.9);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+        
         .play-btn {
             display: inline-block;
             background-color: #4285f4;
@@ -169,10 +220,45 @@
             text-decoration: none;
             font-weight: 500;
             transition: background-color 0.3s;
+            width: 100%;
+            text-align: center;
         }
         
         .play-btn:hover {
             background-color: #3367d6;
+        }
+        
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            font-size: 1.5rem;
+            color: #777;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #4285f4;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* No Results */
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            grid-column: 1 / -1;
+            color: #777;
         }
         
         /* Footer */
@@ -187,17 +273,68 @@
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 2rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
             margin: 1rem 0;
         }
         
         .footer-links a {
             color: #ccc;
             text-decoration: none;
+            transition: color 0.3s;
         }
         
         .footer-links a:hover {
             color: white;
+        }
+        
+        /* Game Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 1rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        .game-frame {
+            width: 100%;
+            height: 70vh;
+            border: none;
+        }
+        
+        .game-modal-info {
+            padding: 1rem;
         }
         
         /* Responsive */
@@ -205,129 +342,29 @@
             header {
                 flex-direction: column;
                 text-align: center;
+                padding: 1rem;
             }
             
             nav ul {
                 margin-top: 1rem;
+                justify-content: center;
+            }
+            
+            nav ul li {
+                margin: 0 0.5rem;
             }
             
             .games-grid {
                 grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             }
+            
+            .category-list {
+                justify-content: center;
+            }
         }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="logo">Free<span>Game</span>Hub</div>
-        <nav>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Categories</a></li>
-                <li><a href="#">New Games</a></li>
-                <li><a href="#">Popular</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <div class="container">
-        <section class="hero">
-            <h1>Play Free Online Games</h1>
-            <p>Thousands of fun games to play in your browser. No downloads required!</p>
-            <div class="search-bar">
-                <input type="text" placeholder="Search for games...">
-            </div>
-        </section>
         
-        <section class="categories">
-            <h2>Popular Categories</h2>
-            <div class="category-list">
-                <div class="category-item">Action</div>
-                <div class="category-item">Adventure</div>
-                <div class="category-item">Puzzle</div>
-                <div class="category-item">Racing</div>
-                <div class="category-item">Sports</div>
-                <div class="category-item">Strategy</div>
-                <div class="category-item">Multiplayer</div>
-                <div class="category-item">Girls</div>
-            </div>
-        </section>
-        
-        <section>
-            <h2>Featured Games</h2>
-            <div class="games-grid">
-                <!-- Game 1 -->
-                <div class="game-card">
-                    <div class="game-thumbnail" style="background-image: url('https://via.placeholder.com/300x150');"></div>
-                    <div class="game-info">
-                        <h3>Car Racing Challenge</h3>
-                        <p>Race against time and beat your high score!</p>
-                        <a href="#" class="play-btn">Play Now</a>
-                    </div>
-                </div>
-                
-                <!-- Game 2 -->
-                <div class="game-card">
-                    <div class="game-thumbnail" style="background-image: url('https://via.placeholder.com/300x150');"></div>
-                    <div class="game-info">
-                        <h3>Bubble Shooter</h3>
-                        <p>Pop all the bubbles before time runs out!</p>
-                        <a href="#" class="play-btn">Play Now</a>
-                    </div>
-                </div>
-                
-                <!-- Game 3 -->
-                <div class="game-card">
-                    <div class="game-thumbnail" style="background-image: url('https://via.placeholder.com/300x150');"></div>
-                    <div class="game-info">
-                        <h3>Zombie Survival</h3>
-                        <p>Defend your base from zombie attacks!</p>
-                        <a href="#" class="play-btn">Play Now</a>
-                    </div>
-                </div>
-                
-                <!-- Game 4 -->
-                <div class="game-card">
-                    <div class="game-thumbnail" style="background-image: url('https://via.placeholder.com/300x150');"></div>
-                    <div class="game-info">
-                        <h3>Jewel Match</h3>
-                        <p>Match colorful jewels and earn points!</p>
-                        <a href="#" class="play-btn">Play Now</a>
-                    </div>
-                </div>
-                
-                <!-- Game 5 -->
-                <div class="game-card">
-                    <div class="game-thumbnail" style="background-image: url('https://via.placeholder.com/300x150');"></div>
-                    <div class="game-info">
-                        <h3>Football Kicks</h3>
-                        <p>Score as many goals as you can!</p>
-                        <a href="#" class="play-btn">Play Now</a>
-                    </div>
-                </div>
-                
-                <!-- Game 6 -->
-                <div class="game-card">
-                    <div class="game-thumbnail" style="background-image: url('https://via.placeholder.com/300x150');"></div>
-                    <div class="game-info">
-                        <h3>Tower Defense</h3>
-                        <p>Build towers to stop enemy waves!</p>
-                        <a href="#" class="play-btn">Play Now</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-    
-    <footer>
-        <p>© 2023 FreeGameHub - All Rights Reserved</p>
-        <div class="footer-links">
-            <a href="#">About Us</a>
-            <a href="#">Contact</a>
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-        </div>
-        <p>Play free online games in your browser. No downloads required!</p>
-    </footer>
-</body>
-</html>
+        @media (max-width: 480px) {
+            .games-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
