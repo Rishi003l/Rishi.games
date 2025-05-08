@@ -529,56 +529,21 @@
         };
         
         // Load game function
-        function loadGame(gameId) {
-            const gamePlayer = document.getElementById('gamePlayer');
-            const gameFrame = document.getElementById('gameFrame');
-            const gameTitle = document.getElementById('gameTitle');
-            
-            // Set game title
-            gameTitle.textContent = gameTitles[gameId] || 'Game';
-            
-            // Load game (in a real implementation, you would use the embed code)
-            // For this demo, we'll just show a message
-            gameFrame.srcdoc = `
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <style>
-                        body {
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100vh;
-                            margin: 0;
-                            background: #f0f0f0;
-                            font-family: Arial, sans-serif;
-                        }
-                        .game-placeholder {
-                            text-align: center;
-                            padding: 2rem;
-                            background: white;
-                            border-radius: 8px;
-                            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="game-placeholder">
-                        <h2>${gameTitles[gameId] || 'Game'}</h2>
-                        <p>In a real implementation, this would be the embedded game.</p>
-                        <p>Embed code for this game would be:</p>
-                        <textarea style="width: 100%; height: 100px; margin-top: 1rem;">${games[gameId] || 'No embed code available'}</textarea>
-                    </div>
-                </body>
-                </html>
-            `;
-            
-            // Show game player and hide other content
-            document.querySelector('.featured-games').style.display = 'none';
-            document.querySelector('.categories-section').style.display = 'none';
-            document.querySelector('.hero').style.display = 'none';
-            gamePlayer.classList.add('active');
-        }
+       function loadGame(gameId) {
+    const gamePlayer = document.getElementById('gamePlayer');
+    const gameFrame = document.getElementById('gameFrame');
+    const gameTitle = document.getElementById('gameTitle');
+
+    gameTitle.textContent = gameTitles[gameId] || 'Game';
+    
+    // This line loads the real embedded game:
+    gameFrame.src = games[gameId] || '';
+
+    document.querySelector('.featured-games').style.display = 'none';
+    document.querySelector('.categories-section').style.display = 'none';
+    document.querySelector('.hero').style.display = 'none';
+    gamePlayer.classList.add('active');
+}
         
         // Hide game and show main content
         function hideGame() {
